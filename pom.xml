@@ -115,4 +115,34 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>maven</id>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>local-central</id>
+            <url>http://nexus.oneapm.me:8081/nexus/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>jcenter-release</id>
+            <url>http://oss.jfrog.org/artifactory/oss-release-local/</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>local-snapshots</id>
+            <uniqueVersion>false</uniqueVersion>
+            <url>http://nexus.oneapm.me:8081/nexus/content/repositories/snapshots/</url>
+            <layout>default</layout>
+        </snapshotRepository>
+        <repository>
+            <id>local-releases</id>
+            <uniqueVersion>true</uniqueVersion>
+            <layout>default</layout>
+            <url>http://nexus.oneapm.me:8081/nexus/content/repositories/releases/</url>
+        </repository>
+    </distributionManagement>
 </project>
