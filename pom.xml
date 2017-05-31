@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.oneapm.touch.retrofit</groupId>
     <artifactId>retrofit-spring-boot-starter</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>Spring Boot :: Starter :: Retrofit</name>
@@ -35,7 +34,7 @@
 
     <scm>
         <developerConnection>scm:git:git@scm.oneapm.me:touch/spring-boot-retrofit-support.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>retrofit-spring-boot-starter-1.0.1</tag>
     </scm>
 
     <dependencies>
@@ -116,7 +115,7 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                    <compilerArguments/>
+                    <compilerArguments />
                 </configuration>
             </plugin>
         </plugins>
