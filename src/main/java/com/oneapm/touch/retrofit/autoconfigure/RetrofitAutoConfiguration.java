@@ -1,6 +1,7 @@
 package com.oneapm.touch.retrofit.autoconfigure;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ConnectionPool;
@@ -84,6 +85,7 @@ public class RetrofitAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public JacksonConverterFactory jacksonConverterFactory(ObjectMapper mapper) {
+            mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
             return JacksonConverterFactory.create(mapper);
         }
     }
@@ -104,7 +106,7 @@ public class RetrofitAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public Retrofit.Builder retrofit() {
+    public Retrofit.Builder retrofit(ObjectMapper mapper) {
         Retrofit.Builder builder = new Retrofit.Builder();
         converterFactories.forEach(builder::addConverterFactory);
         if (okHttpClient != null) {
