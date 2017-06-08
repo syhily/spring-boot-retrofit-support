@@ -3,7 +3,7 @@
 
     <groupId>com.oneapm.touch.retrofit</groupId>
     <artifactId>retrofit-spring-boot-starter</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Spring Boot :: Starter :: Retrofit</name>
@@ -34,7 +34,7 @@
 
     <scm>
         <developerConnection>scm:git:git@scm.oneapm.me:touch/spring-boot-retrofit-support.git</developerConnection>
-        <tag>retrofit-spring-boot-starter-1.0.3</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencies>
