@@ -3,6 +3,7 @@ package com.oneapm.touch.retrofit.autoconfigure;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.oneapm.touch.retrofit.autoconfigure.RetrofitProperties.Connection;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
@@ -55,15 +56,18 @@ public class RetrofitAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public ConnectionPool connectionPool(RetrofitProperties properties) {
-            RetrofitProperties.Connection connection = properties.getConnection();
+            Connection connection = properties.getConnection();
             return new ConnectionPool(connection.getMaxIdleConnections(), connection.getKeepAliveDuration(), MINUTES);
         }
 
         @Bean
         @ConditionalOnMissingBean
         public OkHttpClient okHttpClient(RetrofitProperties properties, ConnectionPool connectionPool) {
+            Connection connection = properties.getConnection();
             return new OkHttpClient.Builder()
-                .readTimeout(properties.getConnection().getTimeout(), TimeUnit.MILLISECONDS)
+                .readTimeout(connection.getReadTimeout(), TimeUnit.MILLISECONDS)
+                .writeTimeout(connection.getWriteTimeout(), TimeUnit.MILLISECONDS)
+                .connectTimeout(connection.getConnectTimeout(), TimeUnit.MILLISECONDS)
                 .connectionPool(connectionPool)
                 .build();
         }
@@ -90,6 +94,17 @@ public class RetrofitAutoConfiguration {
         }
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public Retrofit.Builder retrofit() {
+        Retrofit.Builder builder = new Retrofit.Builder().validateEagerly(true);
+        converterFactories.forEach(builder::addConverterFactory);
+        if (okHttpClient != null) {
+            builder.client(okHttpClient);
+        }
+        return builder;
+    }
+
     /**
      * Check the configured url format is valid by using {@code new URI()}
      */
@@ -98,20 +113,9 @@ public class RetrofitAutoConfiguration {
             .map(RetrofitProperties.EndPoint::getBaseUrl)
             .forEach(url -> {
                 Assert.isTrue(ResourceUtils.isUrl(url), url + " is not a valid url");
-                if (url.endsWith("/")) {
-                    log.warn("The {} end with would require absolute path, remove it would be better.", url);
+                if (!url.endsWith("/")) {
+                    log.warn("The [{}] didn't end with \"/\". This means a relative base url, end with / would be better.", url);
                 }
             });
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public Retrofit.Builder retrofit(ObjectMapper mapper) {
-        Retrofit.Builder builder = new Retrofit.Builder();
-        converterFactories.forEach(builder::addConverterFactory);
-        if (okHttpClient != null) {
-            builder.client(okHttpClient);
-        }
-        return builder;
     }
 }

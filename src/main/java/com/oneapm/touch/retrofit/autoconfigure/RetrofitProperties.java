@@ -38,7 +38,11 @@ public class RetrofitProperties {
     @Data
     public static class Connection {
 
-        private Long timeout = 5000L;
+        private Long readTimeout = 5000L;
+
+        private Long writeTimeout = 5000L;
+
+        private Long connectTimeout = 5000L;
 
         private Integer maxIdleConnections = 5;
 
