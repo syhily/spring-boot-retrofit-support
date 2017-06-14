@@ -1,33 +1,25 @@
 package com.oneapm.touch.retrofit.boot;
 
-import com.oneapm.touch.retrofit.autoconfigure.RetrofitProperties;
+import com.oneapm.touch.retrofit.boot.context.RetrofitContext;
 import retrofit2.Retrofit;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Factory for constructing {@link Retrofit} service instances.
  */
-public class RetrofitServiceFactory {
-    private final Retrofit.Builder retrofitBuilder;
-    private final ConcurrentHashMap<String, Retrofit> retrofitMap;
-    private final RetrofitProperties properties;
+class RetrofitServiceFactory {
+    private final RetrofitContext retrofitContext;
 
-    public RetrofitServiceFactory(Retrofit.Builder retrofitBuilder, RetrofitProperties properties) {
-        this.retrofitBuilder = retrofitBuilder;
-        this.properties = properties;
-        this.retrofitMap = new ConcurrentHashMap<>();
+    RetrofitServiceFactory(RetrofitContext retrofitContext) {
+        this.retrofitContext = retrofitContext;
     }
 
-    public <T> T createServiceInstance(Class<T> serviceClass, String retrofitId) {
+    <T> T createServiceInstance(Class<T> serviceClass, String retrofitId) {
         Retrofit retrofit = getConfiguredRetrofit(retrofitId);
         return retrofit.create(serviceClass);
     }
 
     private Retrofit getConfiguredRetrofit(String beanId) {
-        return retrofitMap.computeIfAbsent(beanId, key -> {
-            RetrofitProperties.EndPoint endPoint = properties.getEndPoint(beanId);
-            return retrofitBuilder.baseUrl(endPoint.getBaseUrl()).build();
-        });
+        return retrofitContext.getRetrofit(beanId)
+            .orElseThrow(() -> new RuntimeException("Cannot obtain [" + beanId + "] Retrofit in your application configuration file."));
     }
 }

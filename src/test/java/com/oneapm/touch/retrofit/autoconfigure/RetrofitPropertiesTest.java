@@ -27,7 +27,7 @@ public class RetrofitPropertiesTest {
     public void injectedValueShouldBeTheSameAsTheConfigurationFile() throws Exception {
         assertThat(properties.getEndpoints(), hasSize(4));
         RetrofitProperties.Connection connection = properties.getConnection();
-        assertThat(connection.getTimeout(), is(5000L));
+        assertThat(connection.getConnectTimeout(), is(5000L));
         assertThat(connection.getKeepAliveDuration(), is(5));
         assertThat(connection.getMaxIdleConnections(), is(5));
     }

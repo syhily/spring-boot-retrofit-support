@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oneapm.touch.retrofit.autoconfigure.RetrofitProperties.Connection;
+import com.oneapm.touch.retrofit.boot.context.LocalRetrofitContext;
+import com.oneapm.touch.retrofit.boot.context.RetrofitContext;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
@@ -19,6 +21,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
+import retrofit2.Retrofit.Builder;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.util.List;
@@ -38,12 +41,15 @@ public class RetrofitAutoConfiguration {
 
     private final OkHttpClient okHttpClient;
 
+    private final RetrofitProperties retrofitProperties;
+
     @Autowired
     public RetrofitAutoConfiguration(List<Converter.Factory> converterFactories, OkHttpClient okHttpClient,
                                      RetrofitProperties retrofitProperties) {
         this.converterFactories = converterFactories;
         this.okHttpClient = okHttpClient;
-        checkConfiguredUrl(retrofitProperties);
+        this.retrofitProperties = retrofitProperties;
+        checkConfiguredUrl(this.retrofitProperties);
     }
 
     @Configuration
@@ -96,13 +102,16 @@ public class RetrofitAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public Retrofit.Builder retrofit() {
-        Retrofit.Builder builder = new Retrofit.Builder().validateEagerly(true);
+    public RetrofitContext retrofitContext() {
+        Builder builder = new Builder().validateEagerly(true);
         converterFactories.forEach(builder::addConverterFactory);
         if (okHttpClient != null) {
             builder.client(okHttpClient);
         }
-        return builder;
+        RetrofitContext context = new LocalRetrofitContext();
+        retrofitProperties.getEndpoints()
+            .forEach(endPoint -> context.register(endPoint.getIdentity(), builder.baseUrl(endPoint.getBaseUrl()).build()));
+        return context;
     }
 
     /**

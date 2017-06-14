@@ -2,7 +2,6 @@ package com.oneapm.touch.retrofit.autoconfigure;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,15 +16,6 @@ public class RetrofitProperties {
     private Connection connection = new Connection();
 
     private List<EndPoint> endpoints = new ArrayList<>();
-
-    /**
-     * Return the required endpoint by using the given identity
-     */
-    public EndPoint getEndPoint(String id) {
-        Assert.notNull(id, "The query retrofit end point id shouldn't be empty");
-        return endpoints.stream().filter(point -> id.equals(point.getIdentity())).findAny()
-            .orElseThrow(() -> new RuntimeException("Cannot obtain [" + id + "] Retrofit in your application configuration file."));
-    }
 
     @Data
     public static class EndPoint {

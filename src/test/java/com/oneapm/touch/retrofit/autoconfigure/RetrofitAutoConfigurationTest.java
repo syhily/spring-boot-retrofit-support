@@ -2,6 +2,7 @@ package com.oneapm.touch.retrofit.autoconfigure;
 
 import com.oneapm.touch.retrofit.boot.RetrofitServiceScan;
 import com.oneapm.touch.retrofit.boot.annotation.RetrofitService;
+import com.oneapm.touch.retrofit.boot.context.RetrofitContext;
 import lombok.Data;
 import org.junit.After;
 import org.junit.Before;
@@ -17,6 +18,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 import retrofit2.http.GET;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -74,17 +76,18 @@ public class RetrofitAutoConfigurationTest {
 
     @Test
     public void testRetrofitAutoConfigured() {
-        Retrofit.Builder builder = context.getBean(Retrofit.Builder.class);
-        assertThat(builder).isNotNull();
+        RetrofitContext context = this.context.getBean(RetrofitContext.class);
+        assertThat(context).isNotNull();
     }
 
     @Test
     public void testRetrofitAutoConfiguredWithConverters() {
-        Retrofit.Builder builder = context.getBean(Retrofit.Builder.class);
-        Retrofit retrofit = builder.build();
+        RetrofitContext context = this.context.getBean(RetrofitContext.class);
+        Optional<Retrofit> retrofit = context.getRetrofit("ai");
+        assertThat(retrofit.get()).isNotNull();
 
         // Assert that we have exactly the converter factories that are auto-configured
-        List<Converter.Factory> converterFactories = retrofit.converterFactories();
+        List<Converter.Factory> converterFactories = retrofit.get().converterFactories();
 
         // Retrofit internally adds BuildInConverters
         assertThat(converterFactories).hasSize(2).hasAtLeastOneElementOfType(JacksonConverterFactory.class);

@@ -2,6 +2,7 @@ package com.oneapm.touch.retrofit.boot;
 
 import com.oneapm.touch.retrofit.autoconfigure.RetrofitProperties;
 import com.oneapm.touch.retrofit.boot.annotation.RetrofitService;
+import com.oneapm.touch.retrofit.boot.context.RetrofitContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -64,10 +65,9 @@ public class RetrofitServiceBeanPostProcessorAdapter extends InstantiationAwareB
         Assert.notNull(beanFactory, "BeanFactory may not be null");
 
         if (retrofitServiceFactory == null) {
-            RetrofitProperties properties = beanFactory.getBean(RetrofitProperties.class);
-            Retrofit.Builder builder = beanFactory.getBean(Retrofit.Builder.class);
+            RetrofitContext context = beanFactory.getBean(RetrofitContext.class);
 
-            retrofitServiceFactory = new RetrofitServiceFactory(builder, properties);
+            retrofitServiceFactory = new RetrofitServiceFactory(context);
         }
 
         return retrofitServiceFactory;
