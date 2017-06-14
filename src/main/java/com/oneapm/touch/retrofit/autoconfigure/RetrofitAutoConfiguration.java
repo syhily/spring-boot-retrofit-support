@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oneapm.touch.retrofit.autoconfigure.RetrofitProperties.Connection;
 import com.oneapm.touch.retrofit.boot.context.LocalRetrofitContext;
 import com.oneapm.touch.retrofit.boot.context.RetrofitContext;
+import com.oneapm.touch.retrofit.boot.intercepts.RetryInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
@@ -75,6 +76,7 @@ public class RetrofitAutoConfiguration {
                 .writeTimeout(connection.getWriteTimeout(), TimeUnit.MILLISECONDS)
                 .connectTimeout(connection.getConnectTimeout(), TimeUnit.MILLISECONDS)
                 .connectionPool(connectionPool)
+                .addInterceptor(new RetryInterceptor(properties.getConnection().getRetryTimes()))
                 .build();
         }
     }

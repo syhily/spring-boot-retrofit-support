@@ -74,9 +74,12 @@ In you `application.yml` set the configuration needed to send http request.
 # The http configuration part for integration with other system
 retrofit:
   connection:
-    timeout: 5000 # The timeout for http request, mile seconds, so 5000 means 5 seconds
+    readTimeout: 10000
+    writeTimeout: 10000
+    connectTimeout: 10000
     maxIdleConnections: 5 # The maximum number of idle connections for each address.
     keepAliveDuration: 5 # The time (minutes) to live for each idle connections.
+    retryTimes: 5
 
   # identity: current available
   # baseUrl: the base part of business system url, would be changed by nginx location, "/" is not required to be the end of url
@@ -95,9 +98,12 @@ retrofit:
 
 ```properties
 retrofit.timeout=5000
-retrofit.connection.timeout=5000
+retrofit.connection.read-timeout=10000
+retrofit.connection.write-timeout=10000
+retrofit.connection.connect-timeout=10000
 retrofit.connection.max-idle-connections=5
 retrofit.connection.keep-alive-duration=5
+retrofit.connection.retry-times=5
 # The list of outer system to communicate with should have a index form like 
 # retrofit.endpoints[index], starts from 0
 retrofit.endpoints[0].identity=ai # The system id
@@ -118,7 +124,8 @@ agentEndpoint.getAgents(1L, 1L);
 - [X] Support multiply retrofit instance.
 - [X] Jackson deserializer should omit the properties's informal case format.
 - [X] Improve async http request support.
-- [ ] Remove the `Retrofit.Builder`, using a single bean to hold the real retrofit factory. Supported dynamic base url.
+- [X] Remove the `Retrofit.Builder`, using a single bean to hold the real retrofit factory.
+- [X] Retry in limit times if request failed.
 - [ ] Drop `@RetrofitServiceScan` annotation or auto-configure it.
 
 ---
