@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oneapm.touch.retrofit.autoconfigure.RetrofitProperties.Connection;
+import com.oneapm.touch.retrofit.autoconfigure.RetrofitProperties.Log;
 import com.oneapm.touch.retrofit.boot.context.LocalRetrofitContext;
 import com.oneapm.touch.retrofit.boot.context.RetrofitContext;
+import com.oneapm.touch.retrofit.boot.intercepts.HttpLoggingInterceptor;
 import com.oneapm.touch.retrofit.boot.intercepts.RetryInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ConnectionPool;
@@ -53,6 +55,7 @@ public class RetrofitAutoConfiguration {
         checkConfiguredUrl(this.retrofitProperties);
     }
 
+    @Slf4j
     @Configuration
     @ConditionalOnClass(OkHttpClient.class)
     public static class OkHttpClientConfiguration {
@@ -71,13 +74,23 @@ public class RetrofitAutoConfiguration {
         @ConditionalOnMissingBean
         public OkHttpClient okHttpClient(RetrofitProperties properties, ConnectionPool connectionPool) {
             Connection connection = properties.getConnection();
-            return new OkHttpClient.Builder()
+            Log logConf = properties.getLog();
+
+            OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .readTimeout(connection.getReadTimeout(), TimeUnit.MILLISECONDS)
                 .writeTimeout(connection.getWriteTimeout(), TimeUnit.MILLISECONDS)
                 .connectTimeout(connection.getConnectTimeout(), TimeUnit.MILLISECONDS)
-                .connectionPool(connectionPool)
-                .addInterceptor(new RetryInterceptor(properties.getConnection().getRetryTimes()))
-                .build();
+                .connectionPool(connectionPool);
+
+            if (connection.getRetryTimes() != null && connection.getRetryTimes() > 0) {
+                builder.addInterceptor(new RetryInterceptor(connection.getRetryTimes()));
+            }
+            if (logConf.getEnabled() != null && logConf.getEnabled()) {
+                HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(log, logConf.getLevel());
+                loggingInterceptor.setContentLevel(logConf.getContent());
+                builder.addInterceptor(loggingInterceptor);
+            }
+            return builder.build();
         }
     }
 

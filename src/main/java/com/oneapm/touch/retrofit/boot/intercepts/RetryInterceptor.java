@@ -24,7 +24,7 @@ public class RetryInterceptor implements Interceptor {
         Request request = chain.request();
         Response response = doRequest(chain, request);
         int tryCount = 0;
-        while (response == null && tryCount <= retryTimes) {
+        while (response == null && tryCount < retryTimes) {
             Request newRequest = request.newBuilder().build(); // Avoid the cache
             response = doRequest(chain, newRequest);
             tryCount++;

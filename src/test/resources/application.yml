@@ -1,5 +1,10 @@
 # The http configuration part for integration with other system
 retrofit:
+  log:
+    enabled: true
+    context: BASIC # NONE, BASIC, HEADERS, BODY
+    level: INFO
+
   connection:
     connectTimeout: 5000 # The timeout for http request, mile seconds, so 5000 means 5 seconds
     maxIdleConnections: 5 # The maximum number of idle connections for each address.
