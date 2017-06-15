@@ -110,7 +110,7 @@ public class RetrofitAutoConfigurationTest {
         EnvironmentTestUtils.addEnvironment(context, "retrofit.enable=true",
             "retrofit.endpoints[0].identity=ai", "retrofit.endpoints[0].baseUrl=http://127.0.0.1:10010",
             "retrofit.endpoints[1].identity=bi", "retrofit.endpoints[1].baseUrl=http://127.0.0.1:10011",
-            "retrofit.connection.timeout=5000");
+            "retrofit.connection.timeout=5000", "retrofit.connection.retry-times=5", "retrofit.log.enabled=true");
         context.register(RetrofitAutoConfiguration.class, RetrofitTestConfiguration.class);
         context.refresh();
     }

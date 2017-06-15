@@ -12,7 +12,7 @@ import java.util.List;
  * Spring Boot Retrofit autoconfigure properties
  */
 @Data
-@ConfigurationProperties(prefix = "retrofit", ignoreNestedProperties = true)
+@ConfigurationProperties(prefix = "retrofit")
 public class RetrofitProperties {
 
     private Connection connection = new Connection();
