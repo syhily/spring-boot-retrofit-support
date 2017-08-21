@@ -1,7 +1,7 @@
 package com.oneapm.touch.retrofit.autoconfigure;
 
-import com.oneapm.touch.retrofit.boot.intercepts.HttpLoggingInterceptor.ContentLevel;
 import lombok.Data;
+import okhttp3.logging.HttpLoggingInterceptor;
 import org.slf4j.event.Level;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -42,7 +42,7 @@ public class RetrofitProperties {
 
         private Integer keepAliveDuration = 5;
 
-        private Integer retryTimes = 0;
+        private int retryTimes = 0;
     }
 
     @Data
@@ -50,7 +50,7 @@ public class RetrofitProperties {
 
         private Boolean enabled = false;
 
-        private ContentLevel content = ContentLevel.NONE;
+        private HttpLoggingInterceptor.Level content = HttpLoggingInterceptor.Level.NONE;
 
         private Level level = Level.DEBUG;
     }

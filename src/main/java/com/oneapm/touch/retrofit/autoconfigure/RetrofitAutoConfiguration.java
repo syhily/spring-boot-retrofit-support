@@ -7,16 +7,18 @@ import com.oneapm.touch.retrofit.autoconfigure.RetrofitProperties.Connection;
 import com.oneapm.touch.retrofit.autoconfigure.RetrofitProperties.Log;
 import com.oneapm.touch.retrofit.boot.context.LocalRetrofitContext;
 import com.oneapm.touch.retrofit.boot.context.RetrofitContext;
-import com.oneapm.touch.retrofit.boot.intercepts.HttpLoggingInterceptor;
-import com.oneapm.touch.retrofit.boot.intercepts.HttpLoggingInterceptor.ContentLevel;
 import com.oneapm.touch.retrofit.boot.intercepts.RetryInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ConnectionPool;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -74,9 +76,8 @@ public class RetrofitAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public OkHttpClient okHttpClient(RetrofitProperties properties, ConnectionPool connectionPool) {
+        public OkHttpClient okHttpClient(RetrofitProperties properties, ConnectionPool connectionPool, List<Interceptor> interceptors) {
             Connection connection = properties.getConnection();
-            Log logConf = properties.getLog();
 
             OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .readTimeout(connection.getReadTimeout(), TimeUnit.MILLISECONDS)
@@ -84,15 +85,46 @@ public class RetrofitAutoConfiguration {
                 .connectTimeout(connection.getConnectTimeout(), TimeUnit.MILLISECONDS)
                 .connectionPool(connectionPool);
 
-            if (connection.getRetryTimes() != null && connection.getRetryTimes() > 0) {
-                builder.addInterceptor(new RetryInterceptor(connection.getRetryTimes()));
+            for (Interceptor interceptor : interceptors) {
+                builder.addInterceptor(interceptor);
             }
-            if (logConf.getEnabled() != null && logConf.getEnabled()) {
-                HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(log, logConf.getLevel());
-                loggingInterceptor.setContentLevel(logConf.getContent());
-                builder.addInterceptor(loggingInterceptor);
-            }
+
             return builder.build();
+        }
+
+        @Configuration
+        @ConditionalOnClass(Interceptor.class)
+        public static class InterceptorConfiguration {
+
+            @Bean
+            @ConditionalOnClass(HttpLoggingInterceptor.class)
+            @ConditionalOnProperty(value = "retrofit.log.enabled", havingValue = "true")
+            public HttpLoggingInterceptor loggingInterceptor(RetrofitProperties properties) {
+                Log logConf = properties.getLog();
+                HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor(innerLogger(logConf.getLevel(), OkHttpClientConfiguration.log));
+                interceptor.setLevel(logConf.getContent());
+                return interceptor;
+            }
+
+            @Bean
+            public RetryInterceptor retryInterceptor(RetrofitProperties properties) {
+                return new RetryInterceptor(properties.getConnection().getRetryTimes());
+            }
+
+            private HttpLoggingInterceptor.Logger innerLogger(Level level, Logger logger) {
+                if (level == Level.DEBUG) {
+                    return logger::debug;
+                } else if (level == Level.ERROR) {
+                    return logger::error;
+                } else if (level == Level.INFO) {
+                    return logger::info;
+                } else if (level == Level.TRACE) {
+                    return logger::trace;
+                } else if (level == Level.WARN) {
+                    return logger::warn;
+                }
+                throw new UnsupportedOperationException("We don't support this log level currently.");
+            }
         }
     }
 
